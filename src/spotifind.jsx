@@ -243,10 +243,7 @@ const SpotifyAuthApp = () => {
                         {track.artists.map(artist => artist.name).join(', ')}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="whitespace-nowrap">
-                     {Math.floor(track.duration_ms / 60000)}:{String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-                    </Badge>
-
+                    
                   </div>
                 ))}
               </div>
