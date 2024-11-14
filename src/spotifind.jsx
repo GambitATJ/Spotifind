@@ -1,27 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import audioFeaturesData from './data.js';
 
-const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1"; // Replace with your client ID
-const REDIRECT_URI = encodeURIComponent("https://spot1.d28hcwl9lhrshr.amplifyapp.com/callback");
+// Previous constants remain the same
+const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1";
+const REDIRECT_URI = encodeURIComponent("http://localhost:5175/callback");
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const RESPONSE_TYPE = "token";
 const SCOPE = encodeURIComponent("user-top-read user-read-private user-read-email");
 
+// Import the data structure
+
+
+// Define the order of features
+const ORDERED_FEATURES = [
+  'duration_ms',
+  'danceability',
+  'energy',
+  'key',
+  'loudness',
+  'mode',
+  'speechiness',
+  'acousticness',
+  'instrumentalness',
+  'liveness',
+  'valence',
+  'tempo',
+  'time_signature'
+];
+
 const SpotifyAuthApp = () => {
-  // State management for both users
+  // Previous state variables remain the same
   const [user1Token, setUser1Token] = useState("");
   const [user2Token, setUser2Token] = useState("");
   const [user1Tracks, setUser1Tracks] = useState([]);
   const [user2Tracks, setUser2Tracks] = useState([]);
-  const [user1Error, setUser1Error] = useState(""); 
+  const [user1Error, setUser1Error] = useState("");
   const [user2Error, setUser2Error] = useState("");
   const [isUser1Loading, setIsUser1Loading] = useState(false);
   const [isUser2Loading, setIsUser2Loading] = useState(false);
   const [similarityScore, setSimilarityScore] = useState(null);
   const [recommendedTracks, setRecommendedTracks] = useState([]);
-  
+  const [audioFeatures, setAudioFeatures] = useState(audioFeaturesData);
+
+  // Previous useEffect remains the same
   useEffect(() => {
-    // Parse hash from URL
     const hash = window.location.hash;
     if (hash) {
       const hashParams = new URLSearchParams(hash.substring(1));
@@ -29,7 +52,6 @@ const SpotifyAuthApp = () => {
       const state = hashParams.get("state");
       
       if (token) {
-        // Store token based on state parameter
         if (state === "user1") {
           window.localStorage.setItem("user1Token", token);
           setUser1Token(token);
@@ -37,35 +59,43 @@ const SpotifyAuthApp = () => {
           window.localStorage.setItem("user2Token", token);     
           setUser2Token(token);
         }
-        // Clear the hash
         window.history.pushState("", document.title, window.location.pathname);
       }
     }
 
-    // Load existing tokens from localStorage
     const storedUser1Token = window.localStorage.getItem("user1Token");
     const storedUser2Token = window.localStorage.getItem("user2Token");
     if (storedUser1Token) setUser1Token(storedUser1Token);
     if (storedUser2Token) setUser2Token(storedUser2Token);
   }, []);
 
-  const loginUser = (userNumber) => {
-    const authUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${userNumber}&show_dialog=true`;
-    window.location.href = authUrl;
-  };
-
-  const logoutUser = (userNumber) => {
-    if (userNumber === 'user1') {
-      setUser1Token("");
-      setUser1Tracks([]);
-      window.localStorage.removeItem("user1Token");
-    } else {
-      setUser2Token("");
-      setUser2Tracks([]);
-      window.localStorage.removeItem("user2Token");
+  // Modified getAudioFeatures function to maintain order
+  const getAudioFeatures = async (trackId, token) => {
+    try {
+      const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch audio features');
+      
+      const data = await response.json();
+      
+      // Create ordered features object
+      const orderedFeatures = {};
+      ORDERED_FEATURES.forEach(feature => {
+        orderedFeatures[feature] = data[feature];
+      });
+      
+      return orderedFeatures;
+    } catch (error) {
+      console.error('Error fetching audio features:', error);
+      return null;
     }
   };
 
+  // Modified getTopTracks function remains mostly the same
   const getTopTracks = async (userNumber) => {
     const token = userNumber === 'user1' ? user1Token : user2Token;
     const setLoading = userNumber === 'user1' ? setIsUser1Loading : setIsUser2Loading;
@@ -89,11 +119,37 @@ const SpotifyAuthApp = () => {
       
       const data = await response.json();
       setTracks(data.items);
+
+      // Fetch audio features for each track
+      const tracksWithFeatures = await Promise.all(
+        data.items.map(async (track, index) => {
+          const features = await getAudioFeatures(track.id, token);
+          return {
+            id: track.id,
+            name: track.name,
+            artists: track.artists.map(artist => artist.name),
+            features: features
+          };
+        })
+      );
+
+      // Update audio features data structure
+      const updatedAudioFeatures = {
+        ...audioFeatures,
+        [userNumber]: {
+          tracks: tracksWithFeatures
+        }
+      };
+
+      setAudioFeatures(updatedAudioFeatures);
+
+      // Save to local storage
+      localStorage.setItem('audioFeaturesData', JSON.stringify(updatedAudioFeatures));
+
       setError("");
     } catch (err) {
-      setError("Failed to load top tracks. Please try logging in again.");
+      setError("Failed to load tracks and features. Please try logging in again.");
       console.error(err);
-      // Clear token if it's invalid
       if (err.message.includes('401')) {
         logoutUser(userNumber);
       }
@@ -102,10 +158,36 @@ const SpotifyAuthApp = () => {
     }
   };
 
+  // Modified logout function to clear audio features
+  const logoutUser = (userNumber) => {
+    if (userNumber === 'user1') {
+      setUser1Token("");
+      setUser1Tracks([]);
+      window.localStorage.removeItem("user1Token");
+      setAudioFeatures(prev => ({
+        ...prev,
+        user1: { tracks: [] }
+      }));
+    } else {
+      setUser2Token("");
+      setUser2Tracks([]);
+      window.localStorage.removeItem("user2Token");
+      setAudioFeatures(prev => ({
+        ...prev,
+        user2: { tracks: [] }
+      }));
+    }
+  };
+
+  // Previous login and compareTopTracks functions remain the same
+  const loginUser = (userNumber) => {
+    const authUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${userNumber}&show_dialog=true`;
+    window.location.href = authUrl;
+  };
 
   const compareTopTracks = async () => {
     try {
-      const response = await axios.post('https://colab.research.google.com/drive/1rsjeEYeMp3FzjFW_wBaESxP1eTifXFZt?usp=sharing/compare-tracks', {
+      const response = await axios.post('https://spot1.d28hcwl9lhrshr.amplifyapp.com/compare-tracks', {
         user1Tracks,
         user2Tracks,
       });
@@ -165,11 +247,45 @@ const SpotifyAuthApp = () => {
     marginBottom: '20px',
   };
 
+  // Updated track item styles
   const trackItemStyle = {
     display: 'flex',
     alignItems: 'center',
     padding: '10px 0',
     borderBottom: '1px solid #eee',
+    position: 'relative', // Added for absolute positioning of duration
+  };
+
+  const numberStyle = {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#999',
+    minWidth: '30px',
+    marginRight: '15px',
+  };
+
+  // Updated track info style to leave space for duration
+  const trackInfoStyle = {
+    flex: 1,
+    paddingRight: '60px', // Make space for duration
+  };
+
+  // Updated duration style to position it absolutely
+  const durationStyle = {
+    position: 'absolute',
+    right: '0',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontSize: '14px',
+    color: '#666',
+    fontFamily: 'monospace',
+    fontWeight: 'bold'
+  };
+
+  const formatDuration = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const UserSection = ({ userNumber, token, tracks, error, isLoading }) => (
@@ -218,31 +334,18 @@ const SpotifyAuthApp = () => {
               <div>
                 {tracks.map((track, index) => (
                   <div key={track.id} style={trackItemStyle}>
-                    <span style={{ 
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#999',
-                      marginRight: '20px',
-                      minWidth: '30px'
-                    }}>
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p style={{ 
-                        margin: '0 0 5px 0',
-                        fontWeight: 'bold',
-                        color: '#333'
-                      }}>
+                    <span style={numberStyle}>{index + 1}</span>
+                    <div style={trackInfoStyle}>
+                      <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
                         {track.name}
                       </p>
-                      <p style={{ 
-                        margin: 0,
-                        fontSize: '14px',
-                        color: '#666'
-                      }}>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
                         {track.artists.map(artist => artist.name).join(', ')}
                       </p>
                     </div>
+                    <span style={durationStyle}>
+                      {formatDuration(track.duration_ms)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -253,12 +356,78 @@ const SpotifyAuthApp = () => {
     </div>
   );
 
+  // Modified Common Tracks section to use the same styling
+  const renderCommonTracks = () => {
+    if (user1Tracks.length > 0 && user2Tracks.length > 0) {
+      const commonTracks = user1Tracks.filter(track1 => 
+        user2Tracks.some(track2 => track2.id === track1.id)
+      );
+
+      if (commonTracks.length > 0) {
+        return (
+          <div style={cardStyle}>
+            <h2 style={{ color: '#333', marginBottom: '20px' }}>Common Tracks</h2>
+            {commonTracks.map((track, index) => (
+              <div key={track.id} style={trackItemStyle}>
+                <span style={numberStyle}>{index + 1}</span>
+                <div style={trackInfoStyle}>
+                  <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
+                    {track.name}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                    {track.artists.map(artist => artist.name).join(', ')}
+                  </p>
+                </div>
+                <span style={durationStyle}>
+                  {formatDuration(track.duration_ms)}
+                </span>
+              </div>
+            ))}
+            <div style={{ marginTop: '20px' }}>
+              <button 
+                onClick={compareTopTracks}
+                style={{
+                  ...buttonStyle,
+                  width: '100%',
+                  backgroundColor: '#1DB954',
+                  marginTop: '20px'
+                }}
+              >
+                Compare Top Tracks
+              </button>
+              {similarityScore !== null && (
+                <div style={{ marginTop: '20px' }}>
+                  <h3>Similarity Score: {similarityScore}</h3>
+                  <h3>Recommended Tracks:</h3>
+                  <ul style={{ padding: 0 }}>
+                    {recommendedTracks.map((track, index) => (
+                      <li key={index} style={trackItemStyle}>
+                        <span style={numberStyle}>{index + 1}</span>
+                        <div style={trackInfoStyle}>
+                          <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
+                            {track.name}
+                          </p>
+                          <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                            {track.artists.map(artist => artist.name).join(', ')}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+    }
+    return null;
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '20px' }}>
       <div style={containerStyle}>
-        <h1 className='header'>
-          Spotifind
-        </h1>
+        <h1 className='header'>Spotifind</h1>
         <div style={userContainerStyle}>
           <UserSection
             userNumber="user1"
@@ -275,63 +444,7 @@ const SpotifyAuthApp = () => {
             isLoading={isUser2Loading}
           />
         </div>
-
-        {user1Tracks.length > 0 && user2Tracks.length > 0 && (
-          <div style={cardStyle}>
-            <div>
-            <h2 style={{ color: '#333', marginBottom: '20px' }}>Common Tracks</h2>
-            {user1Tracks
-              .filter(track1 => 
-                user2Tracks.some(track2 => track2.id === track1.id)
-              )
-              .map((track, index) => (
-                <div key={track.id} style={trackItemStyle}>
-                  <span style={{ 
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: '#999',
-                    marginRight: '20px',
-                    minWidth: '30px'
-                  }}>
-                    {index + 1}
-                  </span>
-                  <div>
-                    <p style={{ 
-                      margin: '0 0 5px 0',
-                      fontWeight: 'bold',
-                      color: '#333'
-                    }}>
-                      {track.name}
-                    </p>
-                    <p style={{ 
-                      margin: 0,
-                      fontSize: '14px',
-                      color: '#666'
-                    }}>
-                      {track.artists.map(artist => artist.name).join(', ')}
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
-          <div>
-          <button onClick={compareTopTracks}>Compare Top Tracks</button>
-    {similarityScore !== null && (
-      <div>
-        <h3>Similarity Score: {similarityScore}</h3>
-        <h3>Recommended Tracks:</h3>
-        <ul>
-          {recommendedTracks.map((track, index) => (
-            <li key={index}>
-              {track.name} - {track.artists.map((artist) => artist.name).join(', ')}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-          </div>
-          </div>
-        )}
+        {renderCommonTracks()}
       </div>
     </div>
   );
