@@ -50,7 +50,7 @@ const SpotifyAuthApp = () => {
   }, []);
 
   const loginUser = (userNumber) => {
-    const authUrl = ${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${userNumber}&show_dialog=true;
+    const authUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${userNumber}&show_dialog=true`;
     window.location.href = authUrl;
   };
 
@@ -81,7 +81,7 @@ const SpotifyAuthApp = () => {
     try {
       const response = await fetch("https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=5", {
         headers: {
-          Authorization: Bearer ${token}
+          Authorization: `Bearer ${token}`
         }
       });
       
@@ -243,7 +243,6 @@ const SpotifyAuthApp = () => {
                         {track.artists.map(artist => artist.name).join(', ')}
                       </p>
                     </div>
-                    
                   </div>
                 ))}
               </div>
