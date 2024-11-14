@@ -4,7 +4,7 @@ import audioFeaturesData from './data.js';
 
 // Previous constants remain the same
 const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1";
-const REDIRECT_URI = encodeURIComponent("http://localhost:5175/callback");
+const REDIRECT_URI = encodeURIComponent("https://spot1.d28hcwl9lhrshr.amplifyapp.com/callback");
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const RESPONSE_TYPE = "token";
 const SCOPE = encodeURIComponent("user-top-read user-read-private user-read-email");
