@@ -228,7 +228,7 @@ const SpotifyAuthApp = () => {
   // Compare top tracks between users
   const compareTopTracks = async () => {
     try {
-      const response = await axios.post('https://spot1.d28hcwl9lhrshr.amplifyapp.com/compare-tracks', {
+      const response = await axios.post(`https://spot1.d28hcwl9lhrshr.amplifyapp.com/compare-tracks`, {
         user1Tracks,
         user2Tracks,
       });
