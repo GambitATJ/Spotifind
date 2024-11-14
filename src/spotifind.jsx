@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1"; // Replace with your client ID
-const REDIRECT_URI = encodeURIComponent("http://localhost:5174/callback");
+const REDIRECT_URI = encodeURIComponent("https://spot1.d28hcwl9lhrshr.amplifyapp.com/callback");
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const RESPONSE_TYPE = "token";
 const SCOPE = encodeURIComponent("user-top-read user-read-private user-read-email");
