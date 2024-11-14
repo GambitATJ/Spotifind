@@ -391,7 +391,50 @@ const SpotifyAuthApp = () => {
             </div>
           </div>
         );
-      }
+      } 
+      else{
+        return(
+        <div>
+
+          <div style={{ marginTop: '20px' }}>
+            <button 
+              onClick={compareTopTracks}
+              style={{
+                ...buttonStyle,
+                width: '100%',
+                backgroundColor: '#1DB954',
+                marginTop: '5px'
+              }}
+            >
+              Compare Top Tracks
+            </button>
+            {similarityScore !== null && (
+              <div style={{ marginTop: '20px' }}>
+                <h3>Similarity Score: {similarityScore}</h3>
+                <h3>Recommended Tracks:</h3>
+                <ul style={{ padding: 0 }}>
+                  {recommendedTracks.map((track, index) => (
+                    <li key={index} style={trackItemStyle}>
+                      <span style={numberStyle}>{index + 1}</span>
+                      <div style={trackInfoStyle}>
+                        <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
+                          {track.name}
+                        </p>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                          {track.artists.map(artist => artist.name).join(', ')}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            
+          )}
+          </div>
+        </div>
+      )
+    }
+    
     }
     return null;
   };
