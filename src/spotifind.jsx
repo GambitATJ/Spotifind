@@ -228,7 +228,7 @@ const SpotifyAuthApp = () => {
   // Compare top tracks between users
   const compareTopTracks = async () => {
     try {
-      const response = await axios.post('https://181a-18-213-200-192.ngrok-free.app/compare-tracks', {
+      const response = await axios.post('https://76fb-18-213-200-192.ngrok-free.app/compare-tracks', {
         user1Tracks,
         user2Tracks,
       }, {
