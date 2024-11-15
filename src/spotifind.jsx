@@ -372,7 +372,7 @@ const SpotifyAuthApp = () => {
               >
                 Compare Top Tracks
               </button>
-              {similarityScore !== null && (
+              {/* {similarityScore !== null && (
                 <div style={{ marginTop: '20px' }}>
                   <h3>Similarity Score: {similarityScore}</h3>
                   <h3>Recommended Tracks:</h3>
@@ -392,7 +392,7 @@ const SpotifyAuthApp = () => {
                     ))}
                   </ul>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         );
