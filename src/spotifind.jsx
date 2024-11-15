@@ -274,7 +274,7 @@ const SpotifyAuthApp = () => {
           }))
         }
       };
-      const response = await axios.post('https://532a-18-213-200-192.ngrok-free.app/compare-tracks', {
+      const response = await axios.post('https://b768-18-213-200-192.ngrok-free.app/compare-tracks', {
         formattedData,
       }, {
         headers: {
