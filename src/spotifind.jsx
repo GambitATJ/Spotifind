@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import audioFeaturesData from './data.js';
 
-// Authentication constants for Spotify API
+
 const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1";
 const REDIRECT_URI = encodeURIComponent("https://spot1.d35x29ay3m6g9f.amplifyapp.com/callback");
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const RESPONSE_TYPE = "token";
 const SCOPE = encodeURIComponent("user-top-read user-read-private user-read-email");
 
-// Define the order of audio features for consistent processing
+
 const ORDERED_FEATURES = [
   'duration_ms',
   'danceability',
@@ -27,7 +27,7 @@ const ORDERED_FEATURES = [
 ];
 
 const SpotifyAuthApp = () => {
-  // State management for both users
+
   const [user1Token, setUser1Token] = useState("");
   const [user2Token, setUser2Token] = useState("");
   const [user1Tracks, setUser1Tracks] = useState([]);
@@ -42,7 +42,7 @@ const SpotifyAuthApp = () => {
   const [user1Name, setUser1Name] = useState("");
   const [user2Name, setUser2Name] = useState("");
 
-  // Fetch user profile from Spotify API
+
   const getUserProfile = async (token, userNumber) => {
     try {
       const response = await fetch("https://api.spotify.com/v1/me", {
@@ -68,7 +68,7 @@ const SpotifyAuthApp = () => {
     }
   };
 
-  // Handle authentication flow and token management
+
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -90,7 +90,7 @@ const SpotifyAuthApp = () => {
       }
     }
 
-    // Load stored tokens and usernames from localStorage
+
     const storedUser1Token = window.localStorage.getItem("user1Token");
     const storedUser2Token = window.localStorage.getItem("user2Token");
     const storedUser1Name = window.localStorage.getItem("user1Name");
@@ -108,7 +108,7 @@ const SpotifyAuthApp = () => {
     }
   }, []);
   
-  // Fetch audio features for a specific track
+
   const getAudioFeatures = async (trackId, token) => {
     try {
       const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
@@ -121,7 +121,7 @@ const SpotifyAuthApp = () => {
       
       const data = await response.json();
       
-      // Create ordered features object
+
       const orderedFeatures = {};
       ORDERED_FEATURES.forEach(feature => {
         orderedFeatures[feature] = data[feature];
@@ -134,7 +134,7 @@ const SpotifyAuthApp = () => {
     }
   };
 
-  // Fetch top tracks for a user
+
   const getTopTracks = async (userNumber) => {
     const token = userNumber === 'user1' ? user1Token : user2Token;
     const setLoading = userNumber === 'user1' ? setIsUser1Loading : setIsUser2Loading;
@@ -159,7 +159,7 @@ const SpotifyAuthApp = () => {
       const data = await response.json();
       setTracks(data.items);
 
-      // Fetch audio features for each track
+
       const tracksWithFeatures = await Promise.all(
         data.items.map(async (track) => {
           const features = await getAudioFeatures(track.id, token);
@@ -172,7 +172,7 @@ const SpotifyAuthApp = () => {
         })
       );
 
-      // Update audio features data structure
+
       const updatedAudioFeatures = {
         ...audioFeatures,
         [userNumber]: {
@@ -194,7 +194,7 @@ const SpotifyAuthApp = () => {
     }
   };
 
-  // Handle user logout
+
   const logoutUser = (userNumber) => {
     if (userNumber === 'user1') {
       setUser1Token("");
@@ -219,18 +219,63 @@ const SpotifyAuthApp = () => {
     }
   };
 
-  // Handle user login
+
   const loginUser = (userNumber) => {
     const authUrl = `${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}&state=${userNumber}&show_dialog=true`;
     window.location.href = authUrl;
   };
 
-  // Compare top tracks between users
+
   const compareTopTracks = async () => {
     try {
-      const response = await axios.post('https://ce82-18-213-200-192.ngrok-free.app/compare-tracks', {
-        user1Tracks,
-        user2Tracks,
+      const formattedData = {
+        "user1": {
+          "tracks":user1Tracks.map(track => ({
+            "id": track.id,
+            "name": track.name,
+            "artists": track.artists.map(artist => artist.name),
+            "features": {
+              "duration_ms": track.duration_ms || 0,
+              "danceability": 0,
+              "energy": 0,
+              "key": 0,
+              "loudness": 0,
+              "mode": 0,
+              "speechiness": 0,
+              "acousticness": 0,
+              "instrumentalness": 0,
+              "liveness": 0,
+              "valence": 0,
+              "tempo": 0,
+              "time_signature": 4
+            }
+          }))
+        },
+        "user2": {
+          "tracks": user2Tracks.map(track => ({
+            "id": track.id,
+            "name": track.name,
+            "artists": track.artists.map(artist => artist.name),
+            "features": {
+              "duration_ms": track.duration_ms || 0,
+              "danceability": 0,
+              "energy": 0,
+              "key": 0,
+              "loudness": 0,
+              "mode": 0,
+              "speechiness": 0,
+              "acousticness": 0,
+              "instrumentalness": 0,
+              "liveness": 0,
+              "valence": 0,
+              "tempo": 0,
+              "time_signature": 4
+            }
+          }))
+        }
+      };
+      const response = await axios.post('https://532a-18-213-200-192.ngrok-free.app/compare-tracks', {
+        formattedData,
       }, {
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -247,7 +292,7 @@ const SpotifyAuthApp = () => {
     }
   };
 
-  // Styles
+
   const containerStyle = {
     maxWidth: '1200px',
     margin: '0 auto',
@@ -326,7 +371,7 @@ const SpotifyAuthApp = () => {
     fontWeight: 'bold'
   };
 
-  // Format duration from milliseconds to MM:SS
+
   const formatDuration = (ms) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -334,7 +379,7 @@ const SpotifyAuthApp = () => {
   };
 
 
-  // Render common tracks between users
+
   const renderCommonTracks = () => {
     if (user1Tracks.length > 0 && user2Tracks.length > 0) {
       const commonTracks = user1Tracks.filter(track1 => 
@@ -445,11 +490,9 @@ const SpotifyAuthApp = () => {
     return null;
   };
 
-  // User Section Component
+
   const UserSection = ({ userNumber, token, tracks, error, isLoading }) => {
-    // Get the appropriate username based on userNumber
     const username = userNumber === "user1" ? user1Name : user2Name;
-    // If no username is available, show a generic placeholder
     const displayName = username || `Connect User ${userNumber.slice(-1)}`;
     
     return (
@@ -541,7 +584,7 @@ const SpotifyAuthApp = () => {
     );
   };
 
-  // Main render
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', padding: '20px' }}>
       <div style={containerStyle}>
