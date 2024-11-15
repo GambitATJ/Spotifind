@@ -36,8 +36,8 @@ const SpotifyAuthApp = () => {
   const [user2Error, setUser2Error] = useState("");
   const [isUser1Loading, setIsUser1Loading] = useState(false);
   const [isUser2Loading, setIsUser2Loading] = useState(false);
-  // const [similarityScore, setSimilarityScore] = useState(null);
-  // const [recommendedTracks, setRecommendedTracks] = useState([]);
+  const [similarityScore, setSimilarityScore] = useState(null);
+  const [recommendedTracks, setRecommendedTracks] = useState([]);
   const [audioFeatures, setAudioFeatures] = useState(audioFeaturesData);
   const [user1Name, setUser1Name] = useState("");
   const [user2Name, setUser2Name] = useState("");
@@ -372,7 +372,7 @@ const SpotifyAuthApp = () => {
               >
                 Compare Top Tracks
               </button>
-              {/* {similarityScore !== null && (
+              {similarityScore !== null && (
                 <div style={{ marginTop: '20px' }}>
                   <h3>Similarity Score: {similarityScore}</h3>
                   <h3>Recommended Tracks:</h3>
@@ -392,7 +392,7 @@ const SpotifyAuthApp = () => {
                     ))}
                   </ul>
                 </div>
-              )} */}
+              )}
             </div>
           </div>
         );
