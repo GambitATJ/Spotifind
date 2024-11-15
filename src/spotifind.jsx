@@ -228,268 +228,69 @@ const SpotifyAuthApp = () => {
 
   const compareTopTracks = async () => {
     try {
+      // Format tracks data to match exactly with data.json structure
       const formattedData = {
-        "user1": {
-          "tracks":user1Tracks.map(track => ({
-            "id": track.id,
-            "name": track.name,
-            "artists": track.artists.map(artist => artist.name),
-            "features": {
-              "duration_ms": track.duration_ms || 0,
-              "danceability": 0,
-              "energy": 0,
-              "key": 0,
-              "loudness": 0,
-              "mode": 0,
-              "speechiness": 0,
-              "acousticness": 0,
-              "instrumentalness": 0,
-              "liveness": 0,
-              "valence": 0,
-              "tempo": 0,
-              "time_signature": 4
+        user1: {
+          tracks: audioFeatures.user1.tracks.length > 0 ? audioFeatures.user1.tracks : user1Tracks.map((track, index) => ({
+            id: track.id,
+            name: track.name,
+            artists: track.artists.map(artist => artist.name),
+            features: {
+              duration_ms: track.duration_ms || 0,
+              danceability: 0,
+              energy: 0,
+              key: 0,
+              loudness: 0,
+              mode: 0,
+              speechiness: 0,
+              acousticness: 0,
+              instrumentalness: 0,
+              liveness: 0,
+              valence: 0,
+              tempo: 0,
+              time_signature: 4
             }
           }))
         },
-        "user2": {
-          "tracks": user2Tracks.map(track => ({
-            "id": track.id,
-            "name": track.name,
-            "artists": track.artists.map(artist => artist.name),
-            "features": {
-              "duration_ms": track.duration_ms || 0,
-              "danceability": 0,
-              "energy": 0,
-              "key": 0,
-              "loudness": 0,
-              "mode": 0,
-              "speechiness": 0,
-              "acousticness": 0,
-              "instrumentalness": 0,
-              "liveness": 0,
-              "valence": 0,
-              "tempo": 0,
-              "time_signature": 4
+        user2: {
+          tracks: audioFeatures.user2.tracks.length > 0 ? audioFeatures.user2.tracks : user2Tracks.map((track, index) => ({
+            id: track.id,
+            name: track.name,
+            artists: track.artists.map(artist => artist.name),
+            features: {
+              duration_ms: track.duration_ms || 0,
+              danceability: 0,
+              energy: 0,
+              key: 0,
+              loudness: 0,
+              mode: 0,
+              speechiness: 0,
+              acousticness: 0,
+              instrumentalness: 0,
+              liveness: 0,
+              valence: 0,
+              tempo: 0,
+              time_signature: 4
             }
           }))
         }
       };
-      const response = await axios.post('https://c0f9-18-213-200-192.ngrok-free.app/compare-tracks', {
-    "user1": {
-      "tracks": [
+  
+      // Ensure exact formatting by converting to and from JSON string
+      const formattedString = JSON.stringify(formattedData, null, 2);
+      const finalData = JSON.parse(formattedString);
+  
+      const response = await axios.post('https://ce82-18-213-200-192.ngrok-free.app/compare-tracks', 
+        finalData,
         {
-          "id": "track1_id",
-          "name": "Track 1",
-          "artists": ["Artist 1"],
-          "features": {
-            "duration_ms": 207960,
-            "danceability": 0.696,
-            "energy": 0.905,
-            "key": 2,
-            "loudness": -2.743,
-            "mode": 1,
-            "speechiness": 0.103,
-            "acousticness": 0.011,
-            "instrumentalness": 0.000905,
-            "liveness": 0.302,
-            "valence": 0.625,
-            "tempo": 114.944,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track2_id",
-          "name": "Track 2",
-          "artists": ["Artist 2"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track3_id",
-          "name": "Track 3",
-          "artists": ["Artist 3"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track4_id",
-          "name": "Track 4",
-          "artists": ["Artist 4"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track5_id",
-          "name": "Track 5",
-          "artists": ["Artist 5"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Content-Type': 'application/json'
           }
         }
-      ]
-    },
-    "user2": {
-      "tracks": [
-        {
-          "id": "track6_id",
-          "name": "Track 6",
-          "artists": ["Artist 6"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track7_id",
-          "name": "Track 7",
-          "artists": ["Artist 7"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track8_id",
-          "name": "Track 8",
-          "artists": ["Artist 8"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track9_id",
-          "name": "Track 9",
-          "artists": ["Artist 9"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        },
-        {
-          "id": "track10_id",
-          "name": "Track 10",
-          "artists": ["Artist 10"],
-          "features": {
-            "duration_ms": 0,
-            "danceability": 0,
-            "energy": 0,
-            "key": 0,
-            "loudness": 0,
-            "mode": 0,
-            "speechiness": 0,
-            "acousticness": 0,
-            "instrumentalness": 0,
-            "liveness": 0,
-            "valence": 0,
-            "tempo": 0,
-            "time_signature": 4
-          }
-        }
-      ]
-    }
-      }, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json'
-        }
-      });
-
+      );
+  
+      console.log('Sent data format:', formattedString);
       console.log(response);
       // const { similarityScore, recommendedTracks } = response.data;
       // setSimilarityScore(similarityScore);
