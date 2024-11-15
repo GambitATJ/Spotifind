@@ -228,7 +228,6 @@ const SpotifyAuthApp = () => {
 
   const compareTopTracks = async () => {
     try {
-      // Format tracks data to match exactly with data.json structure
       const formattedData = {
         user1: {
           tracks: audioFeatures.user1.tracks.length > 0 ? audioFeatures.user1.tracks : user1Tracks.map((track, index) => ({
@@ -276,7 +275,6 @@ const SpotifyAuthApp = () => {
         }
       };
   
-      // Ensure exact formatting by converting to and from JSON string
       const formattedString = JSON.stringify(formattedData, null, 2);
       const finalData = JSON.parse(formattedString);
   
@@ -290,11 +288,9 @@ const SpotifyAuthApp = () => {
         }
       );
   
-      console.log('Sent data format:', formattedString);
-      console.log(response);
-      // const { similarityScore, recommendedTracks } = response.data;
-      // setSimilarityScore(similarityScore);
-      // setRecommendedTracks(recommendedTracks);
+      console.log('API Response:', response.data);
+      const score = response.data.similarityScore;
+      setSimilarityScore(score);
     } catch (error) {
       console.error('Error comparing tracks:', error);
     }
@@ -393,68 +389,71 @@ const SpotifyAuthApp = () => {
       const commonTracks = user1Tracks.filter(track1 => 
         user2Tracks.some(track2 => track2.id === track1.id)
       );
-
-      if (commonTracks.length > 0) {
-        return (
-          <div style={cardStyle}>
-            <h2 style={{ color: '#333', marginBottom: '20px' }}>Common Tracks</h2>
-            {commonTracks.map((track, index) => (
-              <div key={track.id} style={trackItemStyle}>
-                <span style={numberStyle}>{index + 1}</span>
-                <div style={trackInfoStyle}>
-                  <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
-                    {track.name}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-                    {track.artists.map(artist => artist.name).join(', ')}
-                  </p>
+  
+      const scoreCardStyle = {
+        backgroundColor: '#1DB954',
+        borderRadius: '12px',
+        padding: '30px',
+        marginTop: '20px',
+        color: 'white',
+        textAlign: 'center',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      };
+  
+      const scoreCircleStyle = {
+        width: '120px',
+        height: '120px',
+        borderRadius: '50%',
+        backgroundColor: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 20px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      };
+  
+      const scoreTextStyle = {
+        fontSize: '32px',
+        fontWeight: 'bold',
+        color: '#1DB954',
+      };
+  
+      const scoreLabelStyle = {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        marginBottom: '10px',
+      };
+  
+      const scoreDescriptionStyle = {
+        fontSize: '16px',
+        opacity: '0.9',
+        marginBottom: '20px',
+      };
+  
+      return (
+        <div style={cardStyle}>
+          {commonTracks.length > 0 && (
+            <>
+              <h2 style={{ color: '#333', marginBottom: '20px' }}>Common Tracks</h2>
+              {commonTracks.map((track, index) => (
+                <div key={track.id} style={trackItemStyle}>
+                  <span style={numberStyle}>{index + 1}</span>
+                  <div style={trackInfoStyle}>
+                    <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
+                      {track.name}
+                    </p>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                      {track.artists.map(artist => artist.name).join(', ')}
+                    </p>
+                  </div>
+                  <span style={durationStyle}>
+                    {formatDuration(track.duration_ms)}
+                  </span>
                 </div>
-                <span style={durationStyle}>
-                  {formatDuration(track.duration_ms)}
-                </span>
-              </div>
-            ))}
-            <div style={{ marginTop: '20px' }}>
-              <button 
-                onClick={compareTopTracks}
-                style={{
-                  ...buttonStyle,
-                  width: '100%',
-                  backgroundColor: '#1DB954',
-                  marginTop: '20px'
-                }}
-              >
-                Compare Top Tracks
-              </button>
-              {similarityScore !== null && (
-                <div style={{ marginTop: '20px' }}>
-                  <h3>Similarity Score: {similarityScore}</h3>
-                  <h3>Recommended Tracks:</h3>
-                  <ul style={{ padding: 0 }}>
-                    {recommendedTracks.map((track, index) => (
-                      <li key={index} style={trackItemStyle}>
-                        <span style={numberStyle}>{index + 1}</span>
-                        <div style={trackInfoStyle}>
-                          <p style={{ margin: 0, fontWeight: 'bold', color: '#333' }}>
-                            {track.name}
-                          </p>
-                          <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-                            {track.artists.map(artist => artist.name).join(', ')}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      } 
-      else{
-        return(
-        <div>
-
+              ))}
+            </>
+          )}
+          
           <div style={{ marginTop: '20px' }}>
             <button 
               onClick={compareTopTracks}
@@ -462,15 +461,30 @@ const SpotifyAuthApp = () => {
                 ...buttonStyle,
                 width: '100%',
                 backgroundColor: '#1DB954',
-                marginTop: '5px'
+                marginTop: '20px'
               }}
             >
-              Compare Top Tracks
+              Compare Music Taste
             </button>
+            
             {similarityScore !== null && (
+              <div style={scoreCardStyle}>
+                <div style={scoreCircleStyle}>
+                  <span style={scoreTextStyle}>{similarityScore}%</span>
+                </div>
+                <h3 style={scoreLabelStyle}>Music Taste Match</h3>
+                <p style={scoreDescriptionStyle}>
+                  {similarityScore >= 80 ? "You're musical soulmates! 🎵✨" :
+                   similarityScore >= 60 ? "Great musical chemistry! 🎸" :
+                   similarityScore >= 40 ? "You have some common ground! 🎼" :
+                   "Different tastes make life interesting! 🎹"}
+                </p>
+              </div>
+            )}
+  
+            {recommendedTracks.length > 0 && (
               <div style={{ marginTop: '20px' }}>
-                <h3>Similarity Score: {similarityScore}</h3>
-                <h3>Recommended Tracks:</h3>
+                <h3 style={{ color: '#333', marginBottom: '15px' }}>Recommended Tracks</h3>
                 <ul style={{ padding: 0 }}>
                   {recommendedTracks.map((track, index) => (
                     <li key={index} style={trackItemStyle}>
@@ -487,13 +501,10 @@ const SpotifyAuthApp = () => {
                   ))}
                 </ul>
               </div>
-            
-          )}
+            )}
           </div>
         </div>
-      )
-    }
-    
+      );
     }
     return null;
   };
