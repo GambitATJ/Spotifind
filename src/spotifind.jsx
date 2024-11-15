@@ -4,7 +4,7 @@ import audioFeaturesData from './data.js';
 
 // Authentication constants for Spotify API
 const CLIENT_ID = "87d96cbf1c324497bf26051e7f9a5fd1";
-const REDIRECT_URI = encodeURIComponent("https://spot1.d28hcwl9lhrshr.amplifyapp.com/callback");
+const REDIRECT_URI = encodeURIComponent("http://localhost:5174/callback");
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const RESPONSE_TYPE = "token";
 const SCOPE = encodeURIComponent("user-top-read user-read-private user-read-email");
@@ -228,14 +228,19 @@ const SpotifyAuthApp = () => {
   // Compare top tracks between users
   const compareTopTracks = async () => {
     try {
-      const response = await axios.post(`https://spot1.d28hcwl9lhrshr.amplifyapp.com/compare-tracks`, {
+      const response = await axios.post('https://181a-18-213-200-192.ngrok-free.app/compare-tracks', {
         user1Tracks,
         user2Tracks,
+      }, {
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        }
       });
 
-      const { similarityScore, recommendedTracks } = response.data;
-      setSimilarityScore(similarityScore);
-      setRecommendedTracks(recommendedTracks);
+      console.log(response);
+      // const { similarityScore, recommendedTracks } = response.data;
+      // setSimilarityScore(similarityScore);
+      // setRecommendedTracks(recommendedTracks);
     } catch (error) {
       console.error('Error comparing tracks:', error);
     }
