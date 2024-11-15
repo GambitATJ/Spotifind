@@ -278,7 +278,7 @@ const SpotifyAuthApp = () => {
       const formattedString = JSON.stringify(formattedData, null, 2);
       const finalData = JSON.parse(formattedString);
   
-      const response = await axios.post('https://c0f9-18-213-200-192.ngrok-free.app/compare-tracks', 
+      const response = await axios.post('https://7f69-18-213-200-192.ngrok-free.app/compare-tracks', 
         finalData,
         {
           headers: {
